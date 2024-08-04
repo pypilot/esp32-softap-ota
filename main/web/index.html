@@ -1,56 +1,146 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>ESP32 OTA Update</title>
-		<script>
-			function startUpload() {
-				var otafile = document.getElementById("otafile").files;
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>ESP32 OTA Update</title>
+    <script>
+      function startUpload() {
+	  var otafile = document.getElementById("otafile").files;
 
-				if (otafile.length == 0) {
-					alert("No file selected!");
-				} else {
-					document.getElementById("otafile").disabled = true;
-					document.getElementById("upload").disabled = true;
+	  if (otafile.length == 0) {
+	      alert("No file selected!");
+	  } else {
+	      document.getElementById("otafile").disabled = true;
+	      document.getElementById("upload").disabled = true;
 
-					var file = otafile[0];
-					var xhr = new XMLHttpRequest();
-					xhr.onreadystatechange = function() {
-						if (xhr.readyState == 4) {
-							if (xhr.status == 200) {
-								document.open();
-								document.write(xhr.responseText);
-								document.close();
-							} else if (xhr.status == 0) {
-								alert("Server closed the connection abruptly!");
-								location.reload()
-							} else {
-								alert(xhr.status + " Error!\n" + xhr.responseText);
-								location.reload()
-							}
-						}
-					};
+	      var file = otafile[0];
+	      var xhr = new XMLHttpRequest();
+	      xhr.onreadystatechange = function() {
+		  if (xhr.readyState == 4) {
+		      if (xhr.status == 200) {
+			  document.open();
+			  document.write(xhr.responseText);
+			  document.close();
+		      } else if (xhr.status == 0) {
+			  alert("Server closed the connection abruptly!");
+			  location.reload()
+		      } else {
+			  alert(xhr.status + " Error!\n" + xhr.responseText);
+			  location.reload()
+		      }
+		  }
+	      };
 
-					xhr.upload.onprogress = function (e) {
-						var progress = document.getElementById("progress");
-						progress.textContent = "Progress: " + (e.loaded / e.total * 100).toFixed(0) + "%";
-					};
-					xhr.open("POST", "/update", true);
-					xhr.send(file);
-				}
-			}
-		</script>
-	</head>
-	<body>
-		<h1>ESP32 OTA Firmware Update</h1>
-		<div>
-			<label for="otafile">Firmware file:</label>
-			<input type="file" id="otafile" name="otafile" />
-		</div>
-		<div>
-			<button id="upload" type="button" onclick="startUpload()">Upload</button>
-		</div>
-		<div id="progress"></div>
-	</body>
+	      xhr.upload.onprogress = function (e) {
+		  var progress = document.getElementById("progress");
+		  progress.textContent = "Progress: " + (e.loaded / e.total * 100).toFixed(0) + "%";
+		  progress.width = (e.loaded / e.total * 100).toFixed(0) + "%";
+	      };
+	      xhr.open("POST", "/update", true);
+	      xhr.send(file);
+	  }
+      }
+    </script>
+    <style>
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Container for content */
+.container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+}
+
+/* Form elements */
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+input[type="file"] {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        width: 100%;
+    }
+}
+
+.progress {
+    position: relative;
+    width: 100%;
+    height: 30px;
+    background-color: grey;
+}
+
+.bar {
+    position: absolute;
+    width: 0%;
+    height: 100%;
+    background-color: green;
+    margin-top: 20px;
+    font-size: 14px;
+}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ESP32 OTA Firmware Update</h1>
+      <br>
+      <div>
+        <label for="otafile">Firmware file:</label>
+        <input type="file" id="otafile" name="otafile" onchange="startUpload()" />
+      </div>
+      <div class="progress">
+        <div id="fileprogress" class="bar"></div>
+      </div>
+    </div>
+  </body>
 </html>
