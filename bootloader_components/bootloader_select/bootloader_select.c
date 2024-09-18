@@ -8,7 +8,11 @@
 #include "bootloader_common.h"
 #include "bootloader_config.h"
 
+#ifdef CONFIG_IDF_TARGET_ESP32
+#define BOOTLOADER_SELECT_GPIO 32
+#else
 #define BOOTLOADER_SELECT_GPIO 6
+#endif
 
 int __real_bootloader_utility_get_selected_boot_partition(const bootloader_state_t *bs);
 
