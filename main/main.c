@@ -12,7 +12,7 @@
 #include "driver/gpio.h"
 
 #define WIFI_SSID "pypilot_mfd OTA Update"
-#define HW_VERSION 1
+#define HW_VERSION 2
 
 /*
  * Serve OTA update portal (index.html)
@@ -136,8 +136,11 @@ static esp_err_t softap_init(void)
 	return res;
 }
 
+#include "esp_sleep.h"
+#include "driver/rtc_io.h"
+#include "driver/gpio.h"
 void app_main(void) {
-        esp_err_t ret = nvs_flash_init();
+	esp_err_t ret = nvs_flash_init();
 
 	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
