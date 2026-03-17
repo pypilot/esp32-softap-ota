@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "bootloader_select.c"
+    SRCS "bootloader_select.c" "i2c_bitbang.c"
     REQUIRES hal bootloader_support
 )
 

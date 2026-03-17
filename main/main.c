@@ -140,51 +140,51 @@ static esp_err_t softap_init(void)
 #include "driver/rtc_io.h"
 #include "driver/gpio.h"
 void app_main(void) {
-	esp_err_t ret = nvs_flash_init();
+    esp_err_t ret = nvs_flash_init();
 
-	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-		ESP_ERROR_CHECK(nvs_flash_erase());
-		ret = nvs_flash_init();
-	}
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
 
-	ESP_ERROR_CHECK(ret);
+    ESP_ERROR_CHECK(ret);
 
-        nvs_handle_t version_handle;
-        ESP_ERROR_CHECK(nvs_open("version", NVS_READWRITE, &version_handle));
+    nvs_handle_t version_handle;
+    ESP_ERROR_CHECK(nvs_open("version", NVS_READWRITE, &version_handle));
 
-        uint8_t hw_version;
-        esp_err_t err = nvs_get_u8(version_handle, "hw_version", &hw_version);
-        printf("hw_version %d %d\n", err, hw_version);
+    uint8_t hw_version;
+    esp_err_t err = nvs_get_u8(version_handle, "hw_version", &hw_version);
+    printf("hw_version %d %d\n", err, hw_version);
 
-        if(err != ESP_OK || hw_version != HW_VERSION) {
-            ESP_ERROR_CHECK(nvs_set_u8(version_handle, "hw_version", HW_VERSION));
-            ESP_ERROR_CHECK(nvs_commit(version_handle));
-        }
-        nvs_close(version_handle);
+    if(err != ESP_OK || hw_version != HW_VERSION) {
+        ESP_ERROR_CHECK(nvs_set_u8(version_handle, "hw_version", HW_VERSION));
+        ESP_ERROR_CHECK(nvs_commit(version_handle));
+    }
+    nvs_close(version_handle);
                         
-	ESP_ERROR_CHECK(softap_init());
-	ESP_ERROR_CHECK(http_server_init());
+    ESP_ERROR_CHECK(softap_init());
+    ESP_ERROR_CHECK(http_server_init());
 
-	/* Mark current app as valid */
-	const esp_partition_t *partition = esp_ota_get_running_partition();
-	printf("Currently running partition: %s\r\n", partition->label);
+    /* Mark current app as valid */
+    const esp_partition_t *partition = esp_ota_get_running_partition();
+    printf("Currently running partition: %s\r\n", partition->label);
 
-	esp_ota_img_states_t ota_state;
-	if (esp_ota_get_state_partition(partition, &ota_state) == ESP_OK) {
-            if (ota_state == ESP_OTA_IMG_PENDING_VERIFY)
-                esp_ota_mark_app_valid_cancel_rollback();
-	}
+    esp_ota_img_states_t ota_state;
+    if (esp_ota_get_state_partition(partition, &ota_state) == ESP_OK) {
+        if (ota_state == ESP_OTA_IMG_PENDING_VERIFY)
+            esp_ota_mark_app_valid_cancel_rollback();
+    }
 
-        gpio_config_t cs_cfg = {
-            .pin_bit_mask = (1ULL<<0),
-            .mode = GPIO_MODE_INPUT,
-            .pull_up_en = GPIO_PULLUP_ENABLE       //enable pull-up mode
-        };
-        gpio_config(&cs_cfg);
+    gpio_config_t cs_cfg = {
+        .pin_bit_mask = (1ULL<<0),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE       //enable pull-up mode
+    };
+    gpio_config(&cs_cfg);
 
-    	while(1) {
-            vTaskDelay(10);
-            if (gpio_get_level(0) == 0)
-                abort();
-        }
+    while(1) {
+        vTaskDelay(10);
+        if (gpio_get_level(0) == 0)
+            abort();
+    }
 }

@@ -1,0 +1,11 @@
+menu "bootloader select"
+
+config SELECT_ON_IO_PIN
+    bool "Enable stay in bootloader from io low"
+    default n
+
+config SELECT_ON_ACCELEROMETER
+    bool "Enable stay in bootloader from powering upside-down"
+    default n
+
+endmenu
