@@ -6,6 +6,7 @@
 #include "hal/gpio_ll.h"
 #include <esp_ota_ops.h>
 #include <esp_system.h>
+#include <esp_timer.h>
 #include <nvs_flash.h>
 #include <sys/param.h>
 #include <esp_wifi.h>
@@ -19,9 +20,11 @@
  */
 extern const uint8_t index_html_start[] asm("_binary_index_html_start");
 extern const uint8_t index_html_end[] asm("_binary_index_html_end");
+uint64_t t0 = 0;
 
 esp_err_t index_get_handler(httpd_req_t *req)
 {
+        t0 = 0; // disable timeout
 	httpd_resp_send(req, (const char *) index_html_start, index_html_end - index_html_start);
 	return ESP_OK;
 }
@@ -37,6 +40,8 @@ esp_err_t update_post_handler(httpd_req_t *req)
 
 	const esp_partition_t *ota_partition = esp_ota_get_next_update_partition(NULL);
 	ESP_ERROR_CHECK(esp_ota_begin(ota_partition, OTA_SIZE_UNKNOWN, &ota_handle));
+
+        t0 = 0; // disable timeout
 
 	while (remaining > 0) {
 		int recv_len = httpd_req_recv(req, buf, MIN(remaining, sizeof(buf)));
@@ -140,6 +145,7 @@ static esp_err_t softap_init(void)
 #include "driver/rtc_io.h"
 #include "driver/gpio.h"
 void app_main(void) {
+    t0 = esp_timer_get_time();
     esp_err_t ret = nvs_flash_init();
 
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -184,7 +190,13 @@ void app_main(void) {
 
     while(1) {
         vTaskDelay(10);
-        if (gpio_get_level(0) == 0)
+        if (gpio_get_level(0) == 0) {
+            printf("boot pin detected, rebooting\n");
             abort();
+        }
+        if(t0 && esp_timer_get_time() - t0 > 60e6) {
+            printf("timeout on bootloader, rebooting\n");
+            abort();
+        }
     }
 }

@@ -104,6 +104,10 @@ int __wrap_bootloader_utility_get_selected_boot_partition(const bootloader_state
         }
 #endif
 #ifdef CONFIG_SELECT_ON_ACCELEROMETER
+        // delay 10ms help accelerometer stabilize
+        esp_rom_delay_us(10000);
+        feed_rtc_wdt();
+        
         if(bootloader_select_is_accelerometer_inverted())
         {
             return FACTORY_INDEX;
